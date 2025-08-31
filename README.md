@@ -1,6 +1,7 @@
 # 3-tier-apps-with-Python
 
 **Ansible commands**
+
 ansible-galaxy collection install community.docker
 
 ansible-playbook -i inventory.ini playbook.yml
