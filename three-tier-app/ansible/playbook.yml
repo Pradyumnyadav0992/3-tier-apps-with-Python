@@ -1,0 +1,41 @@
+- name: Deploy 3-tier Python/NodeJS App
+  hosts: all
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+
+  tasks:
+
+    - name: Update apt cache and install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ docker_packages }}"
+
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy project files to server
+      synchronize:
+        src: ../three-tier-app/
+        dest: "{{ app_path }}/"
+        recursive: yes
+
+    - name: Ensure .env file exists
+      copy:
+        src: ../.env
+        dest: "{{ app_path }}/.env"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Deploy and start Docker Compose services
+      community.docker.docker_compose:
+        project_src: "{{ app_path }}"
+        state: present
+        restarted: true
+

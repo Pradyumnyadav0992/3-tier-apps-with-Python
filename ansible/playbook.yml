@@ -1,0 +1,46 @@
+- name: Deploy 3-tier Python/NodeJS App
+  hosts: all
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+
+  tasks:
+
+    # -----------------------------------------------
+    # 1. Ensure app directory exists
+    # -----------------------------------------------
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_path }}"
+        state: directory
+        mode: '0755'
+
+    # -----------------------------------------------
+    # 2. Copy project files
+    # -----------------------------------------------
+    - name: Copy project files
+      synchronize:
+        src: ../three-tier-app/
+        dest: "{{ app_path }}/"
+        recursive: yes
+
+    # -----------------------------------------------
+    # 3. Copy .env file securely
+    # -----------------------------------------------
+    - name: Copy .env file
+      copy:
+        src: ../.env
+        dest: "{{ app_path }}/.env"
+        owner: root
+        group: root
+        mode: '0600'
+
+    # -----------------------------------------------
+    # 4. Deploy 3-tier app using Docker Compose
+    # -----------------------------------------------
+    - name: Deploy 3-tier app using Docker Compose
+      community.docker.docker_compose:
+        project_src: "{{ app_path }}"
+        state: present
+        restarted: true
+

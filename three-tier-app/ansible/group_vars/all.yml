@@ -1,0 +1,6 @@
+# Variables for all servers
+app_path: /opt/three-tier-app
+docker_packages:
+  - docker.io
+  - docker-compose
+
